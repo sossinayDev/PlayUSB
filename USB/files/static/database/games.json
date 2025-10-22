@@ -1,0 +1,13 @@
+{
+    "game_index": [
+        {
+            "id": 1,
+            "path": "starfleet_commander",
+            "title": "Starfleet Commander",
+            "genre": "Strategy",
+            "installed": false,
+            "favorite": false,
+            "desc": "Blow up your enemy by commanding your starfleet!"
+        }
+    ]
+}

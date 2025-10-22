@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PlayUSB Launcher</title>
+  <link rel="icon" type="image/x-icon" href="{ADDITIONAL_PATH}static/img/icon.ico">
+
+  <!-- Google Silkscreen font -->
+  <link href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{ADDITIONAL_PATH}static/css/styles.css">
+
+  <script>const game_list = {INSERTION_DATA}</script>
+</head>
+<body>
+
+  <div class="art" aria-hidden="true">
+    <div class="blob a"></div>
+    <div class="blob b"></div>
+    <div class="blob c"></div>
+  </div>
+
+  <main class="container" role="main">
+    <header>
+      <div class="brand">
+        <div class="logo" aria-hidden="true"><img src="static/img/icon.png" class="mark"></img></div>
+        <div>
+          <h1>PlayUSB</h1>
+          <p class="lead">What are you up to today?</p>
+        </div>
+      </div>
+
+      <div style="text-align:right">
+        <div style="font-size:12px;color:rgba(234,244,255,0.7)">Welcome, {HOSTNAME}</div>
+        <div style="font-size:11px;color:rgba(234,244,255,0.5)">Last sync: <span id="lastSync">—</span></div>
+      </div>
+    </header>
+
+    <section class="games" aria-labelledby="games-heading">
+      <h2 id="games-heading" style="margin:0 0 12px 6px;font-size:13px;color:rgba(234,244,255,0.85)">Your games</h2>
+      <div id="content_installed" class="grid" role="list">
+        <!-- Installed games will be populated here by JS -->
+      </div>
+      <h2 id="games-heading" style="margin:0 0 12px 6px;font-size:13px;color:rgba(234,244,255,0.85)">Store</h2>
+      <div id="content_store" class="grid" role="list">
+        <!-- Store games will be populated here by JS -->
+      </div>
+    </section>
+
+    <aside class="sidebar" aria-label="Launcher sidebar">
+      <div class="search">
+        <input id="searchInput" class="input" placeholder="Search games..." aria-label="Search games" />
+        <button id="refreshBtn" class="btn" title="Refresh list">⟳</button>
+      </div>
+
+      <div class="filters" aria-hidden="false">
+        <div style="display:flex;gap:8px">
+          <div class="chip" data-filter="all">ALL</div>
+          <div class="chip" data-filter="installed">INSTALLED</div>
+          <div class="chip" data-filter="favorites">FAVS</div>
+        </div>
+      </div>
+
+      <div class="details">
+        <div style="font-size:13px;font-weight:700">Details</div>
+        <div id="detailsBox" class="placeholder">Select a game to see details here — cover, description, and actions.</div>
+      </div>
+
+      <div style="display:flex;gap:8px">
+        <button id="settingsBtn" class="btn">Settings</button>
+        <button id="exitBtn" class="btn">Exit</button>
+      </div>
+    </aside>
+
+    <footer>© sossinaydev, 2025</footer>
+  </main>
+
+  <script src="static/js/main.js"></script>
+</body>
+</html>
