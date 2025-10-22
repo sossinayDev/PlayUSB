@@ -73,6 +73,10 @@ body {
     opacity: 0.08
 }
 
+button {
+    color: white;
+}
+
 /* layout */
 .container {
     position: relative;
@@ -83,6 +87,13 @@ body {
     display: grid;
     grid-template-columns: 1fr 340px;
     gap: 28px;
+}
+
+span.unavail {
+    width: 100%;
+    margin-top: 10vh;
+    text-align: center;
+    color: #929292;
 }
 
 header {

@@ -45,7 +45,12 @@ function renderGames(list, parent) {
         const thumb = document.createElement('div');
         thumb.className = 'thumb';
         thumb.innerHTML = `<div style=\"display:flex;flex-direction:column;gap:6px;width:100%\"><strong class=\"title\">${g.title}</strong><span class=\"meta\">${g.genre} • ${g.installed ? 'Installed' : 'Not installed'}</span></div>`;
-        thumb.style.backgroundImage = `url(static/database/games/${g.path}/thumb.png)`
+        if (parent==store_games_container){
+            thumb.style.backgroundImage = `url(${data.server}${g.path}/thumb.png)`
+        }
+        else {
+            thumb.style.backgroundImage = `url(static/database/games/${g.path}/thumb.png)`
+        }
         thumb.style.backgroundSize = "100%"
 
         const actions = document.createElement('div');
@@ -65,19 +70,19 @@ function renderGames(list, parent) {
             launch.onclick = () => install_game(g.id)
         }
 
-        const info = document.createElement('img');
-        info.className = 'img fav';
-        if (g.favorite) {
-            info.src = `static/img/star_filled.svg`;
-        }
-        else {
-            info.src = `static/img/star_empty.svg`;
-        }
-        info.id = `fav_star_${g.id}`
-        info.onclick = () => toggle_favorite(g);
+        // const info = document.createElement('img');
+        // info.className = 'img fav';
+        // if (g.favorite) {
+        //     info.src = `static/img/star_filled.svg`;
+        // }
+        // else {
+        //     info.src = `static/img/star_empty.svg`;
+        // }
+        // info.id = `fav_star_${g.id}`
+        // info.onclick = () => toggle_favorite(g);
 
         actions.appendChild(launch);
-        actions.appendChild(info);
+        // actions.appendChild(info);
 
         card.appendChild(thumb);
         card.appendChild(actions);
@@ -154,13 +159,13 @@ function applyFilters() {
 
 
 function launch_game(game_id) {
-    let game_path = `games/${game_id}`;
-    window.location.href = game_path;
+    const url = `game/${game_id}`; // GET to this URL
+    fetch(url, { method: 'GET' })
 }
 
 function install_game(game_id) {
-    let game_path = `install_game/${game_id}`;
-    window.location.href = game_path;
+    const url = `install_game/${game_id}`; // GET to this URL
+    fetch(url, { method: 'GET' })
 }
 
 
@@ -181,10 +186,6 @@ function save() {
 }
 
 function load() {
-    if (navigator.onLine) {
-        
-    }
-
     // let temp = localStorage.getItem("playusb_games")
     // if (temp != null) {
     //     games = JSON.parse(temp)
@@ -199,7 +200,12 @@ function load() {
     //         return true
     //     }
     // }
-    games = data.game_index
+    games = data.game_index;
+
+    games.forEach(g => {
+        g.installed = (data.downloaded_games.includes(g.path));
+    });
+
     return true
 }
 
@@ -214,6 +220,14 @@ function load() {
     document.querySelector('.chip[data-filter="all"]').style.background = 'rgba(255,255,255,0.02)';
     load();
     renderGames(games, installed_games_container);
-    renderGames(games, store_games_container);
+
+    if (navigator.onLine) {
+    // if (false) {
+        renderGames(games, store_games_container);
+    }
+    else {
+        document.getElementById("store_unavailable").style.display="block";
+        store_games_container.style.display = "none";
+    }
     applyFilters();
 })();

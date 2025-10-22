@@ -5,9 +5,11 @@ import requests
 import time
 import asyncio
 from threading import Thread
+import os
+import subprocess
 
 
-game_server = "https://raw.githubusercontent.com/sossinayDev/PlayUSB/refs/heads/main/USB/files/static/database/"
+game_server = "https://raw.githubusercontent.com/sossinayDev/PlayUSB/refs/heads/main/library/"
 
 download_queue = []
 
@@ -30,7 +32,11 @@ no_games = False
 
 stick_info = default_stick_info
 games = {}
-
+downloaded_games = []
+try:
+    downloaded_games = os.listdir("static/databse/games")
+except:
+    pass
 
 
 def save_stick_info():
@@ -42,14 +48,22 @@ def save_stick_info():
 
 # Try to update games
 try:
-    response = requests.get(game_server+"games.json")
+    url = game_server + "games.json"
+    # force fresh fetch (bypass caches) by adding a timestamp query param and no-cache headers
+    url_no_cache = f"{url}?_={int(time.time()*1000)}"
+    print(url_no_cache)
+    headers = {"Cache-Control": "no-cache", "Pragma": "no-cache"}
+    response = requests.get(url_no_cache, headers=headers, timeout=10)
     if response.status_code == 200:
-        with open("static/database/games.json", "w") as f:
+        os.makedirs("static/database/", exist_ok=True)
+        with open("static/database/games.json", "w", encoding="utf-8") as f:
             f.write(response.text)
-            just_updated = True
-            print("Updated game library")
-except:
-    print("Failed to update game library")
+        just_updated = True
+        print("Updated game library")
+    else:
+        print(f"Failed to update game library: HTTP {response.status_code}")
+except Exception as e:
+    print("Failed to update game library:", e)
 
 
 # Try to load games
@@ -91,6 +105,11 @@ def get_dashboard(additional_path: str = ""):
     insertion_data["new_device"] = new_device
     insertion_data["new_stick"] = new_stick
     insertion_data["no_games"] = no_games
+    insertion_data["server"] = game_server
+    try:
+        insertion_data["downloaded_games"] = os.listdir("static/database/games")
+    except:
+        insertion_data["downloaded_games"] = []
     
     text = open('dashboard.html', encoding='utf-8').read().replace("{HOSTNAME}", gethostname())
     text = text.replace("{ INSERTION_DATA }", json.dumps(insertion_data))
@@ -104,6 +123,13 @@ def return_redirect(new_path):
     """
     return base.replace("{new_path}", new_path)
 
+def get_game_data_with_id(id):
+    id = int(id)
+    for game in games["game_index"]:
+        if game["id"] == id:
+            return game
+    return None
+
 
 @app.route('/')
 @app.route('/index.html')
@@ -112,7 +138,16 @@ def index():
 
 @app.route('/game/<game_id>')
 def serve_game(game_id):
-    return open(f'games/{game_id}/game.html', encoding='utf-8').read()
+    data = get_game_data_with_id(game_id)
+    if data == None:
+        return ""
+    path = f"static/database/games/{data["path"]}/"
+    meta = json.load(open(path+"meta.json"))
+    if meta["type"] == "web":
+        game = os.path.abspath(path+meta["execute"])
+        print(f"Executing command: "+f"start {game}")
+        subprocess.run(f"start {game}", shell=True)
+    return ""
 
 @app.route('/install_game/<game_id>')
 def install_game(game_id):
@@ -125,30 +160,55 @@ def uninstall_game(game_id):
 
 
 if __name__ == '__main__':
+    import signal
+    
+    async def main():
+        flask_thread = Thread(target=lambda: app.run(debug=True, use_reloader=False))
+        flask_thread.daemon = True
+        flask_thread.start()
 
-    def run_app():
-        app.run(debug=True, use_reloader=False)
+        try:
+            while True:
+                if len(download_queue) > 0:
+                    current_download = int(download_queue[0])
+                    current_download_data = games["game_index"][current_download-1]
+                    print(f"Downloading {current_download_data['title']}...")
+                    url = game_server + current_download_data['path']+"/"
+                    try:
+                        print("Getting:"+url+"meta.json")
+                        meta = json.loads(requests.get(url+"/meta.json").text)
+                        meta["files"]["meta.json"] = {
+                            "type": "metadata"
+                        }
+                        print(meta)
+                        target_files = list(meta["files"].keys())
+                        for file in target_files:
+                            data = meta["files"][file]
+                            path = url+file
+                            destination = f"static/database/games/{current_download_data['path']}/"+file
+                            resp = requests.get(path, stream=True, timeout=20)
+                            if resp.status_code != 200:
+                                raise Exception(f"Failed to fetch {path}: HTTP {resp.status_code}")
 
-    Thread(target=run_app).start()
+                            os.makedirs(os.path.dirname(destination), exist_ok=True)
+                            with open(destination, "wb") as fh:
+                                for chunk in resp.iter_content(chunk_size=8192):
+                                    if chunk:
+                                        fh.write(chunk)
+                            print(f"Downloaded: {destination}")
 
-    # You can add your async download process here
-    async def download_process():
-        while True:
-            # Implement your downloading logic here
-            if len(download_queue) > 0:
-                current_download = int(download_queue[0])
-                current_download_data = games["game_index"][current_download-1]
-                print(f"Downloading {current_download_data['title']}...")
-                url = game_server + "games/"+current_download_data['path']+"/"
-                try:
-                    print("Getting:"+url+"/meta.json")
-                    meta = json.loads(requests.get(url+"/meta.json").text())
-                    print(meta)
-                except:
-                    print("Failed to download")
-                    download_queue.pop(0)
-                
-            await asyncio.sleep(1)
+                            # If all files processed, remove from queue
+                            if file == target_files[-1]:
+                                print(f"Finished downloading {current_download_data['title']}")
+                                download_queue.pop(0)
+                    except:
+                        print("Failed to download")
+                        download_queue.pop(0)
+                    
+                await asyncio.sleep(1)
+        except KeyboardInterrupt:
+            print("\nShutting down gracefully...")
 
-
-    asyncio.run(download_process())
+    # Handle Ctrl+C using the default handler so KeyboardInterrupt is raised
+    signal.signal(signal.SIGINT, signal.default_int_handler)
+    asyncio.run(main())
