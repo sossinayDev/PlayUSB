@@ -4,6 +4,9 @@
     "files": {
         "game.html": {
             "type": "browser_game"
+        },
+        "thumb.png": {
+            "type": "thumbnail"
         }
     }
 }
