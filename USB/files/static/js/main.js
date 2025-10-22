@@ -2,6 +2,34 @@ const installed_games_container = document.getElementById('content_installed');
 const store_games_container = document.getElementById('content_store');
 const detailsBox = document.getElementById('detailsBox');
 const lastSync = document.getElementById('lastSync');
+const popup_overlay = document.getElementById('popupOverlay')
+const popup = document.getElementById('popup')
+
+
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && !popupOverlay.hidden) {
+    hide_popup();
+  }
+});
+
+
+
+function show_popup(title,innerHTML) {
+    popup.innerHTML = `
+<h3 id="popupTitle">${title}</h3>
+${innerHTML}
+<div class="popup-actions">
+    <button id="popupCloseBtn" class="btn" onclick="hide_popup()">Close</button>
+</div>
+    `;
+
+    popup_overlay.style.display = "flex";
+}
+
+function hide_popup(){
+    popup_overlay.style.display = "none";
+}
 
 function formatDate(d) {
     return new Date(d).toLocaleString();
@@ -116,7 +144,7 @@ function applyFilters() {
     });
     renderGames(filtered_installed, installed_games_container);
     const filtered_store = games.filter(g => {
-        if (!g.installed) return false;
+        if (g.installed) return false;
         if (filter === 'favorites' && !g.favorite) return false;
         if (q && !(g.title.toLowerCase().includes(q) || g.genre.toLowerCase().includes(q))) return false;
         return true;
@@ -157,29 +185,22 @@ function load() {
         
     }
 
-    let temp = localStorage.getItem("playusb_games")
-    if (temp != null) {
-        games = JSON.parse(temp)
-        if (games && typeof games === 'object' && Array.isArray(games)) {
-            games = new Proxy(games, {
-                set: function (target, property, value) {
-                    target[property] = value;
-                    save();
-                    return true;
-                }
-            });
-            return games
-        }
-    }
-    games = game_list.game_index
-    games = new Proxy(games, {
-        set: function (target, property, value) {
-            target[property] = value;
-            save();
-            return true;
-        }
-    });
-    return game_list
+    // let temp = localStorage.getItem("playusb_games")
+    // if (temp != null) {
+    //     games = JSON.parse(temp)
+    //     if (games && typeof games === 'object' && Array.isArray(games)) {
+    //         games = new Proxy(games, {
+    //             set: function (target, property, value) {
+    //                 target[property] = value;
+    //                 save();
+    //                 return true;
+    //             }
+    //         });
+    //         return true
+    //     }
+    // }
+    games = data.game_index
+    return true
 }
 
 
@@ -192,5 +213,7 @@ function load() {
     // select ALL
     document.querySelector('.chip[data-filter="all"]').style.background = 'rgba(255,255,255,0.02)';
     load();
+    renderGames(games, installed_games_container);
+    renderGames(games, store_games_container);
     applyFilters();
 })();

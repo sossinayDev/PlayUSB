@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="en">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -10,8 +11,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{ADDITIONAL_PATH}static/css/styles.css">
 
-  <script>const game_list = {INSERTION_DATA}</script>
+  <script>const data = { INSERTION_DATA }</script>
 </head>
+
 <body>
 
   <div class="art" aria-hidden="true">
@@ -56,14 +58,14 @@
       <div class="filters" aria-hidden="false">
         <div style="display:flex;gap:8px">
           <div class="chip" data-filter="all">ALL</div>
-          <div class="chip" data-filter="installed">INSTALLED</div>
           <div class="chip" data-filter="favorites">FAVS</div>
         </div>
       </div>
 
       <div class="details">
         <div style="font-size:13px;font-weight:700">Details</div>
-        <div id="detailsBox" class="placeholder">Select a game to see details here — cover, description, and actions.</div>
+        <div id="detailsBox" class="placeholder">Select a game to see details here — cover, description, and actions.
+        </div>
       </div>
 
       <div style="display:flex;gap:8px">
@@ -75,6 +77,19 @@
     <footer>© sossinaydev, 2025</footer>
   </main>
 
+
+  <div id="popupOverlay" class="popup-overlay" style="display: none;">
+    <div id="popup" class="popup" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
+      <h3 id="popupTitle">Settings</h3>
+      <p>Here you can manage launcher preferences.</p>
+
+      <div class="popup-actions">
+        <button id="popupCloseBtn" class="btn">Close</button>
+      </div>
+    </div>
+  </div>
+
   <script src="static/js/main.js"></script>
 </body>
+
 </html>

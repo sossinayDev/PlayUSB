@@ -1,0 +1,9 @@
+{
+    "type": "web",
+    "execute": "game.html",
+    "files": {
+        "game.html": {
+            "type": "browser_game"
+        }
+    }
+}
