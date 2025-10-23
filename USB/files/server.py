@@ -142,7 +142,7 @@ def serve_game(game_id):
     data = get_game_data_with_id(game_id)
     if data == None:
         return ""
-    path = f"static/database/games/{data["path"]}/"
+    path = f"static/database/games/{data['path']}/"
     meta = json.load(open(path+"meta.json"))
     if meta["type"] == "web":
         game = os.path.abspath(path+meta["execute"])
