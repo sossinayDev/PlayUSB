@@ -29,6 +29,7 @@ new_device = False
 new_stick = False
 no_games = False
 
+is_linux = os.name == 'posix'
 
 stick_info = default_stick_info
 games = {}
@@ -147,6 +148,13 @@ def serve_game(game_id):
         game = os.path.abspath(path+meta["execute"])
         print(f"Executing command: "+f"start {game}")
         subprocess.run(f"start {game}", shell=True)
+    elif meta["type"] == "win":
+        game = os.path.abspath(path+meta["execute"])
+        if is_linux:
+            subprocess.run(f"wine {game}", shell=True)
+        else:
+            subprocess.run(f"start {game}", shell=True)
+
     return ""
 
 @app.route('/install_game/<game_id>')
