@@ -44,7 +44,7 @@ function renderGames(list, parent) {
 
         const thumb = document.createElement('div');
         thumb.className = 'thumb';
-        thumb.innerHTML = `<div style=\"display:flex;flex-direction:column;gap:6px;width:100%\"><strong class=\"title\">${g.title}</strong><span class=\"meta\">${g.genre} • ${g.installed ? 'Installed' : 'Not installed'}</span></div>`;
+        thumb.innerHTML = `<div style=\"display:flex;flex-direction:column;gap:6px;width:100%\"><strong class=\"title\">${g.title}</strong><span class=\"meta\">${g.genre} • ${g.installed ? 'Installed' : 'Not installed'} • ${beautiful_kb(g.size)}</span></div>`;
         if (parent == store_games_container) {
             thumb.style.backgroundImage = `url(${data.server}${g.path}/thumb.png)`
         }
@@ -275,18 +275,23 @@ function save() {
     localStorage.setItem("playusb_games", JSON.stringify(games))
 }
 
+function beautiful_kb(kb) {
+    kb = kb / 1024; // Convert to MB
+    if (kb > 1024) {
+        kb = (kb / 1024).toFixed(2) + ' GB'; // Convert to GB if necessary
+    } else {
+        kb = kb.toFixed(2) + ' MB';
+    }
+    return kb
+}
+
 async function update_info() {
     let resp = (await (await fetch('/kb_used')).text())
     console.log(resp)
     let size = parseInt(resp);
     console.log(size)
 
-    size = size / 1024; // Convert to MB
-    if (size > 1024) {
-        size = (size / 1024).toFixed(2) + ' GB'; // Convert to GB if necessary
-    } else {
-        size = size.toFixed(2) + ' MB';
-    }
+    size= beautiful_kb(size)
     
     time = formatDate(new Date());
 
