@@ -179,6 +179,22 @@ def uninstall_game(game_id):
 def serve_game_library():
     return get_game_list()
 
+@app.route('/kb_used')
+def get_size():
+    base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    if not os.path.exists(base_dir):
+        return "0"
+    total = 0
+    for dirpath, dirnames, filenames in os.walk(base_dir):
+        for fname in filenames:
+            fp = os.path.join(dirpath, fname)
+            try:
+                total += os.path.getsize(fp)
+            except OSError:
+                pass
+    kb = total // 1024
+    return str(kb)
+
 @app.route('/download_progress')
 def get_progress():
     d = {

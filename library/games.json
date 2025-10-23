@@ -7,7 +7,8 @@
             "genre": "Strategy",
             "installed": false,
             "favorite": false,
-            "desc": "Blow up your enemy by commanding your starfleet!"
+            "desc": "Blow up your enemy by commanding your starfleet!",
+            "size": 38100
         },
         {
             "id": 2,
@@ -16,7 +17,8 @@
             "genre": "Puzzle",
             "installed": false,
             "favorite": false,
-            "desc": "Make the perfect copy of yourself!"
+            "desc": "Make the perfect copy of yourself!",
+            "size": 10800
         },
         {
             "id": 3,
@@ -25,7 +27,8 @@
             "genre": "Party/Rougelike",
             "installed": false,
             "favorite": false,
-            "desc": "Fight with stuff from boxes (and your friends)"
+            "desc": "Fight with stuff from boxes (and your friends)",
+            "size": 11600
         },
         {
             "id": 4,
@@ -34,7 +37,8 @@
             "genre": "Platformer",
             "installed": false,
             "favorite": false,
-            "desc": "Hey ummm, your car won't brake anymore. So better clear all the levels to get it fixed I guess.\n\n\u00a9 <a href=\"https://edgarmendoza.itch.io/help-no-brake\">Edgar Mendoza</a>"
+            "desc": "Hey ummm, your car won't brake anymore. So better clear all the levels to get it fixed I guess.\n\n\u00a9 <a href=\"https://edgarmendoza.itch.io/help-no-brake\">Edgar Mendoza</a>",
+            "size": 52200
         }
     ]
 }

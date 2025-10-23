@@ -1,0 +1,40 @@
+{
+    "game_index": [
+        {
+            "id": 1,
+            "path": "starfleet_commander",
+            "title": "Starfleet Commander",
+            "genre": "Strategy",
+            "installed": false,
+            "favorite": false,
+            "desc": "Blow up your enemy by commanding your starfleet!"
+        },
+        {
+            "id": 2,
+            "path": "quantum_mirror",
+            "title": "Quantum Mirror",
+            "genre": "Puzzle",
+            "installed": false,
+            "favorite": false,
+            "desc": "Make the perfect copy of yourself!"
+        },
+        {
+            "id": 3,
+            "path": "super_crate_box",
+            "title": "Super Crate Box",
+            "genre": "Party/Rougelike",
+            "installed": false,
+            "favorite": false,
+            "desc": "Fight with stuff from boxes (and your friends)"
+        },
+        {
+            "id": 4,
+            "path": "help_no_brakes",
+            "title": "Help! No brakes!",
+            "genre": "Platformer",
+            "installed": false,
+            "favorite": false,
+            "desc": "Hey ummm, your car won't brake anymore. So better clear all the levels to get it fixed I guess.\n\n\u00a9 <a href=\"https://edgarmendoza.itch.io/help-no-brake\">Edgar Mendoza</a>"
+        }
+    ]
+}

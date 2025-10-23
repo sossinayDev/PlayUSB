@@ -1,7 +1,7 @@
 const installed_games_container = document.getElementById('content_installed');
 const store_games_container = document.getElementById('content_store');
 const detailsBox = document.getElementById('detailsBox');
-const lastSync = document.getElementById('lastSync');
+const stickInfo = document.getElementById('stick_info');
 const popup_overlay = document.getElementById('popupOverlay')
 const popup = document.getElementById('popup')
 
@@ -235,6 +235,8 @@ setInterval(update_download_status, 2000);
 
 setInterval(handle_indeterminate, 20);
 
+setInterval(update_info, 10000)
+
 window.addEventListener("blur", () => {
     document.getElementById("notification_launching").remove()
 });
@@ -273,6 +275,24 @@ function save() {
     localStorage.setItem("playusb_games", JSON.stringify(games))
 }
 
+async function update_info() {
+    let resp = (await (await fetch('/kb_used')).text())
+    console.log(resp)
+    let size = parseInt(resp);
+    console.log(size)
+
+    size = size / 1024; // Convert to MB
+    if (size > 1024) {
+        size = (size / 1024).toFixed(2) + ' GB'; // Convert to GB if necessary
+    } else {
+        size = size.toFixed(2) + ' MB';
+    }
+    
+    time = formatDate(new Date());
+
+    stickInfo.textContent = `${time} | ${size} used`
+}
+
 function load() {
     games = data.game_index;
 
@@ -280,12 +300,13 @@ function load() {
         g.installed = (data.downloaded_games.includes(g.path));
     });
 
-    return true
+    return true;
 }
 
 
 async function rerender_library() {
     let online = await is_online()
+    update_info()
     fetch('/game_library', { method: 'GET' })
         .then(response => response.json())
         .then(gl => {
@@ -318,7 +339,6 @@ async function rerender_library() {
 
 // init
 (function init() {
-    lastSync.textContent = formatDate(new Date());
     // select ALL
     document.querySelector('.chip[data-filter="all"]').style.background = 'rgba(255,255,255,0.02)';
     rerender_library();
