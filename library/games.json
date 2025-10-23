@@ -17,6 +17,15 @@
             "installed": false,
             "favorite": false,
             "desc": "Make the perfect copy of yourself!"
+        },
+        {
+            "id": 3,
+            "path": "super_crate_box",
+            "title": "SuperCrateBoxTogether",
+            "genre": "Party/Rougelike",
+            "installed": false,
+            "favorite": false,
+            "desc": "Fight with stuff from boxes (and your friends)"
         }
     ]
 }

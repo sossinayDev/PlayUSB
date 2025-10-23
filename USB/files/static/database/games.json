@@ -8,6 +8,15 @@
             "installed": false,
             "favorite": false,
             "desc": "Blow up your enemy by commanding your starfleet!"
+        },
+        {
+            "id": 2,
+            "path": "quantum_mirror",
+            "title": "Quantum Mirror",
+            "genre": "Puzzle",
+            "installed": false,
+            "favorite": false,
+            "desc": "Make the perfect copy of yourself!"
         }
     ]
 }
