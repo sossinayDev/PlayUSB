@@ -31,13 +31,23 @@ no_games = False
 
 is_linux = os.name == 'posix'
 
+def get_game_list():
+    result = []
+    try:
+        base = os.listdir("static/database/games/")
+        for game in base:
+            if os.path.exists("static/database/games/"+game+"/meta.json"):
+                result.append(game)
+        return result
+    except FileNotFoundError:
+        return []
+    else:
+        pass
+
 stick_info = default_stick_info
 games = {}
 downloaded_games = []
-try:
-    downloaded_games = os.listdir("static/databse/games")
-except:
-    pass
+downloaded_games = get_game_list()
 
 
 def save_stick_info():
@@ -107,10 +117,7 @@ def get_dashboard(additional_path: str = ""):
     insertion_data["new_stick"] = new_stick
     insertion_data["no_games"] = no_games
     insertion_data["server"] = game_server
-    try:
-        insertion_data["downloaded_games"] = os.listdir("static/database/games")
-    except:
-        insertion_data["downloaded_games"] = []
+    insertion_data["downloaded_games"] = get_game_list()
     
     text = open('dashboard.html', encoding='utf-8').read().replace("{HOSTNAME}", gethostname())
     text = text.replace("{ INSERTION_DATA }", json.dumps(insertion_data))
@@ -146,14 +153,16 @@ def serve_game(game_id):
     meta = json.load(open(path+"meta.json"))
     if meta["type"] == "web":
         game = os.path.abspath(path+meta["execute"])
-        print(f"Executing command: "+f"start {game}")
-        subprocess.run(f"start {game}", shell=True)
+        print(f"Executing command: "+f'\"{game}\"')
+        subprocess.run(f'\"{game}\"', shell=True)
     elif meta["type"] == "win":
         game = os.path.abspath(path+meta["execute"])
         if is_linux:
-            subprocess.run(f"wine {game}", shell=True)
+            print(f"Executing command: wine {game}")
+            subprocess.run(f'wine "{game}"', shell=True)
         else:
-            subprocess.run(f"start {game}", shell=True)
+            print(f"Executing command: {game}")
+            subprocess.run(f'"{game}"', shell=True)
 
     return ""
 
@@ -166,7 +175,26 @@ def install_game(game_id):
 def uninstall_game(game_id):
     return return_redirect("../")
 
+@app.route('/game_library')
+def serve_game_library():
+    return get_game_list()
 
+@app.route('/download_progress')
+def get_progress():
+    d = {
+        "downloads": {}
+    }
+    for game in download_queue:
+        d[game] = {
+            "current": game == download_queue[0],
+            "progress": download_progress if game == download_queue[0] else 0
+        }
+    return d
+
+
+current_download = 0
+current_download_data = {}
+download_progress = 0
 if __name__ == '__main__':
     import signal
     
@@ -177,10 +205,12 @@ if __name__ == '__main__':
 
         try:
             while True:
+                global download_progress
                 if len(download_queue) > 0:
                     current_download = int(download_queue[0])
-                    current_download_data = games["game_index"][current_download-1]
+                    current_download_data = get_game_data_with_id(current_download)
                     print(f"Downloading {current_download_data['title']}...")
+                    download_progress = 0
                     url = game_server + current_download_data['path']+"/"
                     try:
                         print("Getting:"+url+"meta.json")
@@ -188,10 +218,11 @@ if __name__ == '__main__':
                         meta["files"]["meta.json"] = {
                             "type": "metadata"
                         }
+                        download_progress = 0.1
                         print(meta)
                         target_files = list(meta["files"].keys())
+                        i = 0
                         for file in target_files:
-                            data = meta["files"][file]
                             path = url+file
                             destination = f"static/database/games/{current_download_data['path']}/"+file
                             resp = requests.get(path, stream=True, timeout=20)
@@ -204,11 +235,14 @@ if __name__ == '__main__':
                                     if chunk:
                                         fh.write(chunk)
                             print(f"Downloaded: {destination}")
-
+                            download_progress = i / len(target_files) * 0.8 + 0.1
+                            
                             # If all files processed, remove from queue
                             if file == target_files[-1]:
                                 print(f"Finished downloading {current_download_data['title']}")
                                 download_queue.pop(0)
+                                download_progress = 1
+                            i += 1
                     except:
                         print("Failed to download")
                         download_queue.pop(0)

@@ -11,7 +11,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Silkscreen&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="{ADDITIONAL_PATH}static/css/styles.css">
 
-  <script>const data = { INSERTION_DATA }</script>
+  <script>let data = { INSERTION_DATA }</script>
 </head>
 
 <body>
@@ -40,12 +40,14 @@
 
     <section class="games" aria-labelledby="games-heading">
       <h2 id="games-heading" style="margin:0 0 12px 6px;font-size:13px;color:rgba(234,244,255,0.85)">Your games</h2>
+      <span id="no_games" style="display: none;" class='unavail'>You haven't installed any games yet</span>
       <div id="content_installed" class="grid" role="list">
         <!-- Installed games will be populated here by JS -->
       </div>
       <br>
       <h2 id="games-heading" style="margin:0 0 12px 6px;font-size:13px;color:rgba(234,244,255,0.85)">Store</h2>
       <span id="store_unavailable" style="display: none;" class='unavail'>No internet connection - Unavailable</span>
+      <span id="store_empty" style="display: none;" class='unavail'>No games left to download</span>
       <div id="content_store" class="grid" role="list">
         <!-- Store games will be populated here by JS -->
       </div>
@@ -54,7 +56,6 @@
     <aside class="sidebar" aria-label="Launcher sidebar">
       <div class="search">
         <input id="searchInput" class="input" placeholder="Search games..." aria-label="Search games" />
-        <button id="refreshBtn" class="btn" title="Refresh list">⟳</button>
       </div>
 
       <div class="filters" aria-hidden="false">
@@ -88,6 +89,11 @@
       <div class="popup-actions">
         <button id="popupCloseBtn" class="btn">Close</button>
       </div>
+    </div>
+  </div>
+
+  <div id="NotificationOverlay" class="notification-overlay">
+    <div id="notification" class="notification" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
     </div>
   </div>
 

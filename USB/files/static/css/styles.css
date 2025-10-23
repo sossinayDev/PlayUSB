@@ -91,6 +91,7 @@ button {
 
 span.unavail {
     width: 100%;
+    margin-bottom: 10vh;
     margin-top: 10vh;
     text-align: center;
     color: #929292;
@@ -151,6 +152,15 @@ p.lead {
     height: 720px;
     overflow: auto;
     border: 1px solid rgba(255, 255, 255, 0.03)
+}
+
+*::-webkit-scrollbar {
+    display: none;
+}
+
+* {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 .grid {
@@ -348,6 +358,67 @@ footer {
     margin-top: 16px;
     text-align: right;
 }
+
+/* === Notifications === */
+.notification-overlay {
+    position: fixed;
+    inset: 0;
+    top: auto;
+    left: auto;
+    background: none;
+    display: flex;
+    flex-direction: column-reverse;
+    justify-content: right;
+    align-items: right;
+    z-index: 0;
+}
+
+.notification {
+    border-radius: 10px;
+    padding-left: 2vw;
+    padding-right: 2vw;
+    padding-top: 0.5vh;
+    padding-bottom: 0.5vh;
+    background-color: #0b0f14;
+    text-align: right;
+}
+
+.notification p {
+    margin-bottom: 0;
+}
+
+progress {
+    margin-bottom: 1vh;
+    width: 100%;
+    height: 3px;
+}
+
+progress {
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+progress::-webkit-progress-bar {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+}
+
+progress::-webkit-progress-value {
+    background: linear-gradient(90deg, var(--accent), rgba(43, 140, 230, 0.85));
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+progress::-moz-progress-bar {
+    background: linear-gradient(90deg, var(--accent), rgba(43, 140, 230, 0.85));
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+progress.indeterminate {
+    transition: none !important;
+}
+
 
 /* Simple fade-in animation */
 @keyframes popupIn {

@@ -26,6 +26,15 @@
             "installed": false,
             "favorite": false,
             "desc": "Fight with stuff from boxes (and your friends)"
+        },
+        {
+            "id": 4,
+            "path": "help_no_brakes",
+            "title": "Help! No brakes!",
+            "genre": "Platformer",
+            "installed": false,
+            "favorite": false,
+            "desc": "Hey ummm, your car won't brake anymore. So better clear all the levels to get it fixed I guess.\n\n\u00a9 <a href=\"https://edgarmendoza.itch.io/help-no-brake\">Edgar Mendoza</a>"
         }
     ]
 }

@@ -8,14 +8,14 @@ const popup = document.getElementById('popup')
 
 
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !popupOverlay.hidden) {
-    hide_popup();
-  }
+    if (e.key === "Escape" && !popupOverlay.hidden) {
+        hide_popup();
+    }
 });
 
 
 
-function show_popup(title,innerHTML) {
+function show_popup(title, innerHTML) {
     popup.innerHTML = `
 <h3 id="popupTitle">${title}</h3>
 ${innerHTML}
@@ -27,7 +27,7 @@ ${innerHTML}
     popup_overlay.style.display = "flex";
 }
 
-function hide_popup(){
+function hide_popup() {
     popup_overlay.style.display = "none";
 }
 
@@ -45,7 +45,7 @@ function renderGames(list, parent) {
         const thumb = document.createElement('div');
         thumb.className = 'thumb';
         thumb.innerHTML = `<div style=\"display:flex;flex-direction:column;gap:6px;width:100%\"><strong class=\"title\">${g.title}</strong><span class=\"meta\">${g.genre} • ${g.installed ? 'Installed' : 'Not installed'}</span></div>`;
-        if (parent==store_games_container){
+        if (parent == store_games_container) {
             thumb.style.backgroundImage = `url(${data.server}${g.path}/thumb.png)`
         }
         else {
@@ -157,27 +157,115 @@ function applyFilters() {
     renderGames(filtered_store, store_games_container);
 }
 
+function get_game_data_by_id(id) {
+    let result = null
+    games.forEach(g => {
+        if (g.id == id) {
+            result = g
+        }
+    });
+    return result
+}
 
 function launch_game(game_id) {
+    add_notification(`launching`, `<p>Launching game...</p><progress max="100" class="indeterminate"></progress>`)
     const url = `game/${game_id}`; // GET to this URL
     fetch(url, { method: 'GET' })
 }
 
 function install_game(game_id) {
     const url = `install_game/${game_id}`; // GET to this URL
+    let game_data = get_game_data_by_id(game_id)
+    add_notification(`installing_${game_id}`, `<p>Installing ${game_data.title}</p><progress id="progress_bar_${game_id}"></progress>`)
     fetch(url, { method: 'GET' })
 }
 
+function handle_indeterminate() {
+    document.querySelectorAll("progress.indeterminate").forEach(progress_bar => {
+        progress_bar.max = "1";
+        progress_bar.value = Math.sin(Date.now() / 600) / 2 + 0.5;
+    });
+}
 
-searchInput.addEventListener('input', applyFilters);
-document.getElementById('refreshBtn').addEventListener('click', () => {
-    lastSync.textContent = formatDate(new Date());
+function add_notification(id, content) {
+    document.getElementById("NotificationOverlay").innerHTML += `
+    <div id="notification_${id}" class="notification" role="dialog" aria-modal="true" aria-labelledby="popupTitle">
+      ${content}
+    </div>
+    `
+}
 
-    console.log("Refreshing game")
+let previous_downloads = []
+
+function update_download_status() {
+    fetch('/download_progress', {
+        method: 'GET',
+        headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+            'Expires': '0'
+        }
+    })
+        .then(response => response.json())
+        .then(data2 => {
+            console.log(data2)
+            let update_library = false;
+            previous_downloads.forEach(game => {
+                if (!(Object.keys(data2).includes(game))) {
+                    document.getElementById(`notification_installing_${game}`).remove();
+                    update_library = true;
+                }
+            });
+            if (update_library) {
+                rerender_library()
+            }
+            Object.keys(data2).forEach(game_id => {
+                console.log(game_id)
+                const progressBar = document.getElementById(`progress_bar_${game_id}`);
+                if (progressBar) {
+                    progressBar.value = data2[game_id].progress;
+                }
+            });
+            previous_downloads = Object.keys(data2)
+        });
+}
+
+
+setInterval(update_download_status, 2000);
+
+setInterval(handle_indeterminate, 20);
+
+window.addEventListener("blur", () => {
+    document.getElementById("notification_launching").remove()
+});
+
+window.addEventListener("focus", () => {
+    console.log("Window gained focus");
 });
 
 
+
 let games = []
+
+
+async function is_online() {
+    if (!navigator.onLine) return false;
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 3000);
+        await fetch('https://www.google.com/generate_204', {
+            method: 'GET',
+            mode: 'no-cors',
+            cache: 'no-store',
+            signal: controller.signal
+        });
+        clearTimeout(timeout);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
 
 
 function save() {
@@ -186,20 +274,6 @@ function save() {
 }
 
 function load() {
-    // let temp = localStorage.getItem("playusb_games")
-    // if (temp != null) {
-    //     games = JSON.parse(temp)
-    //     if (games && typeof games === 'object' && Array.isArray(games)) {
-    //         games = new Proxy(games, {
-    //             set: function (target, property, value) {
-    //                 target[property] = value;
-    //                 save();
-    //                 return true;
-    //             }
-    //         });
-    //         return true
-    //     }
-    // }
     games = data.game_index;
 
     games.forEach(g => {
@@ -210,7 +284,36 @@ function load() {
 }
 
 
-
+async function rerender_library() {
+    let online = await is_online()
+    fetch('/game_library', { method: 'GET' })
+        .then(response => response.json())
+        .then(gl => {
+            console.log(gl)
+            data.downloaded_games = gl;
+            load()
+            if (data.downloaded_games.length == 0) {
+                document.getElementById("no_games").style.display = "block"
+            }
+            else {
+                document.getElementById("no_games").style.display = "none"
+            }
+            renderGames(games, installed_games_container);
+            document.getElementById("store_empty").style.display = "none"
+            if (online) {
+                if (games.length - data.downloaded_games.length == 0) {
+                    document.getElementById("store_empty").style.display = "block"
+                }
+                renderGames(games, store_games_container);
+                document.getElementById("store_unavailable").style.display = "none";
+            }
+            else {
+                document.getElementById("store_unavailable").style.display = "block";
+                store_games_container.style.display = "none";
+            }
+            applyFilters();
+        });
+}
 
 
 // init
@@ -218,16 +321,5 @@ function load() {
     lastSync.textContent = formatDate(new Date());
     // select ALL
     document.querySelector('.chip[data-filter="all"]').style.background = 'rgba(255,255,255,0.02)';
-    load();
-    renderGames(games, installed_games_container);
-
-    if (navigator.onLine) {
-    // if (false) {
-        renderGames(games, store_games_container);
-    }
-    else {
-        document.getElementById("store_unavailable").style.display="block";
-        store_games_container.style.display = "none";
-    }
-    applyFilters();
+    rerender_library();
 })();
